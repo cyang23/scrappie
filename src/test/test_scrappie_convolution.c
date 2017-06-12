@@ -94,6 +94,7 @@ Vec simple_stride(Vec const v, int stride) {
     return y;
 }
 
+
 /**  Initialise test
  *
  *   @returns 0 on success, non-zero on failure
