@@ -72,9 +72,8 @@ scrappie_matrix nanonet_raw_posterior(const raw_table signal, float min_prob,
     RETURN_NULL_IF(signal.n == 0, NULL);
     RETURN_NULL_IF(NULL == signal.raw, NULL);
 
-    scrappie_matrix raw_mat = nanonet_features_from_raw(signal);
-    scrappie_matrix conv =
-        Convolution(raw_mat, conv_raw_W, conv_raw_b, conv_raw_stride, NULL);
+	scrappie_matrix raw_mat = nanonet_features_from_raw(signal);
+	scrappie_matrix conv = Convolution(raw_mat, conv_raw_W, conv_raw_b, conv_raw_stride, NULL);
     tanh_activation_inplace(conv);
     raw_mat = free_scrappie_matrix(raw_mat);
     //  First GRU layer
@@ -131,6 +130,7 @@ scrappie_matrix nanonet_rgr_posterior(const raw_table signal, float min_prob,
     scrappie_matrix raw_mat = nanonet_features_from_raw(signal);
     scrappie_matrix conv =
         Convolution(raw_mat, conv_rgr_W, conv_rgr_b, conv_rgr_stride, NULL);
+    tanh_activation_inplace(conv);
     raw_mat = free_scrappie_matrix(raw_mat);
     //  First GRU layer
     scrappie_matrix gruB1 =
@@ -152,19 +152,18 @@ scrappie_matrix nanonet_rgr_posterior(const raw_table signal, float min_prob,
     gruB3 = free_scrappie_matrix(gruB3);
     RETURN_NULL_IF(NULL == post, NULL);
 
-    if (return_log) {
-        const int nev = post->nc;
-        const int nstate = post->nr;
-        const __m128 mpv = _mm_set1_ps(min_prob / nstate);
-        const __m128 mpvm1 = _mm_set1_ps(1.0f - min_prob);
-        for (int i = 0; i < nev; i++) {
-            const size_t offset = i * post->nrq;
-            for (int r = 0; r < post->nrq; r++) {
-                post->data.v[offset + r] =
-                    LOGFV(mpv + mpvm1 * post->data.v[offset + r]);
-            }
-        }
-    }
+	if(return_log){
+		const int nblock = post->nc;
+		const int nstate = post->nr;
+		const __m128 mpv = _mm_set1_ps(min_prob / nstate);
+		const __m128 mpvm1 = _mm_set1_ps(1.0f - min_prob);
+		for(int i=0 ; i < nblock ; i++){
+			const size_t offset = i * post->nrq;
+			for(int r=0 ; r < post->nrq ; r++){
+				post->data.v[offset + r] = LOGFV(mpv + mpvm1 * post->data.v[offset + r]);
+			}
+		}
+	}
 
-    return post;
+	return post;
 }
