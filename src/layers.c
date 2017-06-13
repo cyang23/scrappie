@@ -191,12 +191,7 @@ scrappie_matrix feedforward_tanh(const scrappie_matrix X,
     C = affine_map(X, W, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
-        }
-    }
+    tanh_activation_inplace(C);
 
     assert(validate_scrappie_matrix
            (C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
@@ -209,12 +204,7 @@ scrappie_matrix feedforward_exp(const scrappie_matrix X,
     C = affine_map(X, W, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = EXPFV(C->data.v[offset + r]);
-        }
-    }
+    exp_activation_inplace(C);
 
     assert(validate_scrappie_matrix
            (C, 0.0, NAN, 1.0, true, __FILE__, __LINE__));
@@ -241,15 +231,9 @@ scrappie_matrix feedforward2_tanh(const scrappie_matrix Xf,
     C = affine_map2(Xf, Xb, Wf, Wb, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
-        }
-    }
+    tanh_activation_inplace(C);
 
-    assert(validate_scrappie_matrix
-           (C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
+    assert(validate_scrappie_matrix(C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
     return C;
 }
 
