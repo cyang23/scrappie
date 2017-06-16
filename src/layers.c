@@ -233,7 +233,8 @@ scrappie_matrix feedforward2_tanh(const scrappie_matrix Xf,
 
     tanh_activation_inplace(C);
 
-    assert(validate_scrappie_matrix(C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
+    assert(validate_scrappie_matrix
+           (C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
     return C;
 }
 
