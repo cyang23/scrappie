@@ -1,12 +1,12 @@
 #ifndef SCRAPPIE_H
-#define SCRAPPIE_H
+#    define SCRAPPIE_H
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 
-#include <immintrin.h>
-#include <stdbool.h>
+#    include <immintrin.h>
+#    include <stdbool.h>
 
 /*  Structure definitions from scrappie_structures.h  */
     typedef struct {
@@ -43,7 +43,7 @@ extern "C" {
 
     scrappie_matrix free_scrappie_matrix(scrappie_matrix mat);
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 }
-#endif
+#    endif
 #endif                          /* SCRAPPIE_H */

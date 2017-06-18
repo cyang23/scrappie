@@ -178,9 +178,7 @@ event_table read_events(hid_t hdf5file, const char *tablepath,
         // Convert to samples if necessary
         events[ev].start = round(events[ev].start * sample_rate);
         events[ev].length = roundf(events[ev].length * sample_rate);
-    }
 
-    for (int ev = 0; ev < nevent; ev++) {
         // Negative means unassigned
         events[ev].pos = -1;
         events[ev].state = -1;

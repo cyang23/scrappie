@@ -18,17 +18,17 @@ On Debian based systems, the following packages are sufficient (tested Ubuntu 14
 * libhdf5
 * libhdf5-dev
 
-The Intel MKL may be used to provide the BLAS library.  The combination of the Intel `icc` 
-compiler and linking against the MKL can result in significant performance improvements, a 
+The Intel MKL may be used to provide the BLAS library.  The combination of the Intel `icc`
+compiler and linking against the MKL can result in significant performance improvements, a
 gain of 50% being observed on one machine.
 
-On Mac _OSX_ systems, the _argp-standalone_ package is also required.  The *argp-standalone* packae
+On Mac _OSX_ systems, the _argp-standalone_ package is also required.  The *argp-standalone* package
 can be installed using the *brew* package manager (http://brew.sh).
 ```bash
 brew install argp-standalone
 ```
 
-Scrappie makes use of the *OpenMP* extensions to use multiple CPU cores.  These are supported
+Scrappie makes use of the *OpenMP* extensions for multi-processing.  These are supported
 by the system installed compiler on most modern Linux systems but requires a more modern version
 of the *clang/llvm* compiler than that installed on Mac _OSX_ machines.  Support for *OpenMP* was
 adding in *clang/llvm* in version 3.7 (see http://llvm.org or use *brew*).

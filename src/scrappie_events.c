@@ -4,7 +4,6 @@
 #include <glob.h>
 #include <libgen.h>
 #include <math.h>
-
 #if defined(_OPENMP)
 #    include <omp.h>
 #endif
@@ -13,8 +12,11 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/types.h>
+
 #include "decode.h"
+#include "event_detection.h"
 #include "networks.h"
+#include "scrappie_assert.h"
 #include "scrappie_licence.h"
 #include "util.h"
 
@@ -28,6 +30,13 @@ struct _bs {
     int nev;
     char *bases;
     event_table et;
+};
+
+static const struct _bs _bs_null = {
+    .score = 0.0f,
+    .nev = 0,
+    .bases = NULL,
+    .et = {0, 0, 0, NULL}
 };
 
 extern const char *argp_program_version;
@@ -64,6 +73,8 @@ static struct argp_option options[] = {
 #if defined(_OPENMP)
     {"threads", '#', "nreads", 0, "Number of reads to call in parallel"},
 #endif
+    {"segmentation", 14, "chunk:percentile", 0,
+     "Chunk size and percentile for variance based segmentation"},
     {0}
 };
 
@@ -79,6 +90,8 @@ struct arguments {
     float skip_pen;
     bool use_slip;
     int trim_start, trim_end;
+    int varseg_chunk;
+    float varseg_thresh;
     char *segloc1;
     char *segloc2;
     char *dump;
@@ -99,6 +112,8 @@ static struct arguments args = {
     .use_slip = false,
     .trim_start = 50,
     .trim_end = 50,
+    .varseg_chunk = 100,
+    .varseg_thresh = 0.7,
     .segloc1 = "Segmentation",
     .segloc2 = "segmentation",
     .dump = NULL,
@@ -196,6 +211,19 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
         args.compression_chunk_size = atoi(arg);
         assert(args.compression_chunk_size > 0);
         break;
+    case 14:
+        args.varseg_chunk = atoi(strtok(arg, ":"));
+        next_tok = strtok(NULL, ":");
+        if (NULL == next_tok) {
+            errx(EXIT_FAILURE,
+                 "--segmentation should be of form chunk:percentile");
+        }
+        args.varseg_thresh = atof(next_tok) / 100.0;
+        assert(args.varseg_chunk >= 0);
+        assert(args.varseg_thresh > 0.0 && args.varseg_thresh < 1.0);
+        printf("Segmentation -- %d %f\n", args.varseg_chunk,
+               args.varseg_thresh);
+        break;
 #if defined(_OPENMP)
     case '#':
         {
@@ -229,24 +257,39 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
 static struct argp argp = { options, parse_arg, args_doc, doc };
 
 static struct _bs calculate_post(char *filename) {
+    ASSERT_OR_RETURN_NULL(NULL != filename, _bs_null);
 
-    event_table et = args.albacore ?
-        read_albacore_events(filename, args.analysis, "template") :
-        read_detected_events(filename, args.analysis, args.segloc1,
-                             args.segloc2, args.seganalysis);
+    raw_table rt = read_raw(filename, true);
+    ASSERT_OR_RETURN_NULL(NULL != rt.raw, _bs_null);
+
+    const int nsample = rt.end - rt.start;
+    if (nsample <= args.trim_end + args.trim_start) {
+        warnx("Too few samples in %s to call (%d, originally %u).", filename,
+              nsample, rt.n);
+        free(rt.raw);
+        return _bs_null;
+    }
+    rt.start += args.trim_start;
+    rt.end -= args.trim_end;
+
+    range_t segmentation =
+        trim_raw_by_mad(rt, args.varseg_chunk, args.varseg_thresh);
+    rt.start = segmentation.start;
+    rt.end = segmentation.end;
+
+	event_table et = detect_events(rt);
 
     if (NULL == et.event) {
-        return (struct _bs) {
-        0, 0, NULL};
+        return _bs_null;
     }
+
     const int nevent = et.end - et.start;
     if (nevent <= args.trim_start + args.trim_end) {
         warnx
             ("Too few events in %s to call (%d after segmentation, originally %u).",
              filename, nevent, et.n);
         free(et.event);
-        return (struct _bs) {
-        0, 0, NULL};
+        return _bs_null;
     }
     et.start += args.trim_start;
     et.end -= args.trim_end;
@@ -254,8 +297,7 @@ static struct _bs calculate_post(char *filename) {
     scrappie_matrix post = nanonet_posterior(et, args.min_prob, true);
     if (NULL == post) {
         free(et.event);
-        return (struct _bs) {
-        0, 0, NULL};
+        return _bs_null;
     }
     const int nev = post->nc;
     const int nstate = post->nr;
