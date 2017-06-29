@@ -141,7 +141,7 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
         }
         assert(args.trim_start >= 0);
         assert(args.trim_end >= 0);
-        printf("Trim -- %d %d\n", args.trim_start, args.trim_end);
+        fprintf(stderr, "Trim -- %d %d\n", args.trim_start, args.trim_end);
         break;
     case 1:
         args.use_slip = true;
@@ -159,8 +159,8 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
         args.varseg_thresh = atof(next_tok) / 100.0;
         assert(args.varseg_chunk >= 0);
         assert(args.varseg_thresh > 0.0 && args.varseg_thresh < 1.0);
-        printf("Segmentation -- %d %f\n", args.varseg_chunk,
-               args.varseg_thresh);
+        fprintf(stderr, "Segmentation -- %d %f\n", args.varseg_chunk,
+                args.varseg_thresh);
         break;
     case 4:
         args.dump = arg;
