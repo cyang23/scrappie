@@ -277,7 +277,7 @@ static struct _bs calculate_post(char *filename) {
     rt.start = segmentation.start;
     rt.end = segmentation.end;
 
-	event_table et = detect_events(rt);
+    event_table et = detect_events(rt);
 
     if (NULL == et.event) {
         return _bs_null;

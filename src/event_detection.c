@@ -176,24 +176,22 @@ void short_long_peak_detector(DetectorPtr short_detector,
     }
 }
 
-event_table detect_events(raw_table const rt)
-{
+event_table detect_events(raw_table const rt) {
     size_t const window1_length = 3;
     size_t const window2_length = 6;
     double const threshold1 = 1.4;
     double const threshold2 = 1.1;
-    double const peak_height = 0.2;  // TODO(semen): pass on the cmd line
+    double const peak_height = 0.2;     // TODO(semen): pass on the cmd line
 
-    double * data = calloc(rt.n, sizeof(double));
-    double * sums = calloc(rt.n, sizeof(double));
-    double * sumsqs = calloc(rt.n, sizeof(double));
-    double * tstat1 = calloc(rt.n, sizeof(double));
-    double * tstat2 = calloc(rt.n, sizeof(double));
-    size_t * peaks = calloc(rt.n, sizeof(size_t));
+    double *data = calloc(rt.n, sizeof(double));
+    double *sums = calloc(rt.n, sizeof(double));
+    double *sumsqs = calloc(rt.n, sizeof(double));
+    double *tstat1 = calloc(rt.n, sizeof(double));
+    double *tstat2 = calloc(rt.n, sizeof(double));
+    size_t *peaks = calloc(rt.n, sizeof(size_t));
 
-    for( size_t i = 0; i < rt.n; ++i )
-    {
-        data[i] = (double) rt.raw[i];
+    for (size_t i = 0; i < rt.n; ++i) {
+        data[i] = (double)rt.raw[i];
     }
 
     compute_sum_sumsq(data, sums, sumsqs, rt.n);
@@ -226,45 +224,46 @@ event_table detect_events(raw_table const rt)
         .valid_peak = false
     };
 
-    short_long_peak_detector(&short_detector, &long_detector, peak_height, peaks);
+    short_long_peak_detector(&short_detector, &long_detector, peak_height,
+                             peaks);
 
     size_t nevent = 0;
-    for( size_t i = 0; i < rt.n; ++i )
-    {
-        if ( peaks[i] > 0 && peaks[i] < rt.n )
-        {
+    for (size_t i = 0; i < rt.n; ++i) {
+        if (peaks[i] > 0 && peaks[i] < rt.n) {
             nevent++;
         }
     }
     printf("number of events = %ld\n", nevent);
 
-    event_t * events = calloc(nevent, sizeof(event_t));
+    event_t *events = calloc(nevent, sizeof(event_t));
 
     double s = 0;
     double sm = 0;
     double smsq = 0;
     size_t j = 0;
-    for( size_t i = 0; i < rt.n; ++i )
-    {
-        if ( peaks[i] > 0 && peaks[i] < rt.n )
-        {
+    for (size_t i = 0; i < rt.n; ++i) {
+        if (peaks[i] > 0 && peaks[i] < rt.n) {
             size_t e = peaks[i];
 
             events[j].start = s;
             {
-                double const ev_sample_len = (double) e - s;
-                double const ev_mean = (sums[e-1] - sm) / ev_sample_len;
-                double const variance = fmax( 0.0, (sumsqs[e-1] - smsq) / ev_sample_len - pow(ev_mean, 2));
-                events[j].length = (float) ev_sample_len;
-                events[j].mean = (float) ev_mean;
-                events[j].stdv = (float) sqrt(variance);
+                double const ev_sample_len = (double)e - s;
+                double const ev_mean = (sums[e - 1] - sm) / ev_sample_len;
+                double const variance = fmax(0.0,
+                                             (sumsqs[e - 1] -
+                                              smsq) / ev_sample_len -
+                                             pow(ev_mean,
+                                                 2));
+                events[j].length = (float)ev_sample_len;
+                events[j].mean = (float)ev_mean;
+                events[j].stdv = (float)sqrt(variance);
             }
             events[j].pos = -1;
             events[j].state = -1;
 
-            s = (double) e;
-            sm = sums[e-1];
-            smsq = sumsqs[e-1];
+            s = (double)e;
+            sm = sums[e - 1];
+            smsq = sumsqs[e - 1];
 
             j++;
         }
@@ -277,5 +276,6 @@ event_table detect_events(raw_table const rt)
     free(sums);
     free(data);
 
-    return (event_table) {nevent, 0, nevent, events};
+    return (event_table) {
+    nevent, 0, nevent, events};
 }

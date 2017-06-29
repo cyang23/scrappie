@@ -15,7 +15,7 @@
 #        include <stdbool.h>
 #    endif
 
-#include "scrappie_structures.h"
+#    include "scrappie_structures.h"
 
 typedef struct {
     int DEF_PEAK_POS;
