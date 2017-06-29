@@ -48,7 +48,7 @@ mkdir build && cd build && cmake .. && make
 export OMP_NUM_THREADS=`nproc`
 # Use openblas in single-threaded mode
 export OPENBLAS_NUM_THREADS=1
-# Call a folder of reads from events
+# Call a folder of reads via events
 scrappie events reads ... > basecalls.fa
 # Call a folder of reads from raw signal
 scrappie raw reads ... > basecalls.fa
@@ -60,11 +60,11 @@ tail -n +2 strand_list.txt | sed 's:^:/path/to/reads/:' | xargs scrappie raw > b
 
 ## Commandline options
 The commandline options accepted by Scrappie depend on whether it is being used to call
-from events or from raw signal.
+via events or from raw signal.
 ```
 > scrappie help events
 Usage: events [OPTION...] fast5 [fast5 ...]
-Scrappie basecaller -- basecall from events
+Scrappie basecaller -- basecall via events
 
   -#, --threads=nreads       Number of reads to call in parallel
   -a, --analysis=number      Analysis to read events from
@@ -117,7 +117,7 @@ Scrappie basecaller -- basecall from raw signal
 ```
 
 ## Segmentation
-When calling from events, Scrappie relies on the segmentation already being present in the fast5 file
+When calling via events, Scrappie relies on the segmentation already being present in the fast5 file
 and does not do any processing itself.  By default the segmentation is read from 
 `/Analyses/Segmentation_XXX/Summary/segmentation` but other locations can be specified using the
 `--segmenation` option.  

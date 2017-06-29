@@ -41,7 +41,7 @@ static const struct _bs _bs_null = {
 
 extern const char *argp_program_version;
 extern const char *argp_program_bug_address;
-static char doc[] = "Scrappie basecaller -- basecall from events";
+static char doc[] = "Scrappie basecaller -- basecall via events";
 static char args_doc[] = "fast5 [fast5 ...]";
 static struct argp_option options[] = {
     {"analysis", 'a', "number", 0, "Analysis to read events from"},
