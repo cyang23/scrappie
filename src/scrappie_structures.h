@@ -2,6 +2,8 @@
 #ifndef SCRAPPIE_STRUCTURES_H
 #    define SCRAPPIE_STRUCTURES_H
 
+#    include <stddef.h>
+
 typedef struct {
     double start;
     float length;
@@ -10,12 +12,12 @@ typedef struct {
 } event_t;
 
 typedef struct {
-    unsigned int n, start, end;
+    size_t n, start, end;
     event_t *event;
 } event_table;
 
 typedef struct {
-    unsigned int n, start, end;
+    size_t n, start, end;
     float *raw;
 } raw_table;
 

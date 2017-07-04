@@ -263,9 +263,9 @@ static struct _bs calculate_post(char *filename) {
     raw_table rt = read_raw(filename, true);
     ASSERT_OR_RETURN_NULL(NULL != rt.raw, _bs_null);
 
-    const int nsample = rt.end - rt.start;
+    const size_t nsample = rt.end - rt.start;
     if (nsample <= args.trim_end + args.trim_start) {
-        warnx("Too few samples in %s to call (%d, originally %u).", filename,
+        warnx("Too few samples in %s to call (%zu, originally %lu).", filename,
               nsample, rt.n);
         free(rt.raw);
         return _bs_null;
@@ -284,10 +284,10 @@ static struct _bs calculate_post(char *filename) {
         return _bs_null;
     }
 
-    const int nevent = et.end - et.start;
+    const size_t nevent = et.end - et.start;
     if (nevent <= args.trim_start + args.trim_end) {
         warnx
-            ("Too few events in %s to call (%d after segmentation, originally %u).",
+            ("Too few events in %s to call (%zu after segmentation, originally %lu).",
              filename, nevent, et.n);
         free(et.event);
         return _bs_null;

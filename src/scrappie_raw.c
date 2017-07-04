@@ -217,9 +217,9 @@ static struct _raw_basecall_info calculate_post(char *filename) {
     raw_table rt = read_raw(filename, true);
     ASSERT_OR_RETURN_NULL(NULL != rt.raw, _raw_basecall_info_null);
 
-    const int nsample = rt.end - rt.start;
+    const size_t nsample = rt.end - rt.start;
     if (nsample <= args.trim_end + args.trim_start) {
-        warnx("Too few samples in %s to call (%d, originally %u).", filename,
+        warnx("Too few samples in %s to call (%zu, originally %lu).", filename,
               nsample, rt.n);
         free(rt.raw);
         return _raw_basecall_info_null;
@@ -258,7 +258,7 @@ static struct _raw_basecall_info calculate_post(char *filename) {
 static int fprintf_fasta(FILE * fp, const char *readname,
                          const struct _raw_basecall_info res) {
     return fprintf(fp,
-                   ">%s  { \"normalised_score\" : %f,  \"nblock\" : %lu,  \"sequence_length\" : %lu,  \"blocks_per_base\" : %f }\n%s\n",
+                   ">%s  { \"normalised_score\" : %f,  \"nblock\" : %zu,  \"sequence_length\" : %zu,  \"blocks_per_base\" : %f }\n%s\n",
                    readname, -res.score / res.nblock, res.nblock,
                    res.basecall_length,
                    (float)res.nblock / (float)res.basecall_length,
