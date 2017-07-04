@@ -376,26 +376,24 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
      */
     cblas_sgemv(CblasColMajor, CblasTrans, sW->nr, sW->nc, 1.0, sW->data.f,
                 sW->nrq * 4, istate->data.f, 1, 1.0, xF->data.f, 1);
-    for (int i = 0; i < (size / 2); i++) {
-        xF->data.v[i] = logisticfv(xF->data.v[i]);
+    for (int i = 0; i < (size * 2); i++) {
+        xF->data.f[i] = logisticf(xF->data.f[i]);
     }
 
-    const int sizeq = size / 4;
-    const __m128 *z = xF->data.v;
-    __m128 *r = xF->data.v + sizeq;
-    __m128 *hbar = xF->data.v + 2 * sizeq;
-    for (int i = 0; i < sizeq; i++) {
-        r[i] *= istate->data.v[i];
+    const float *z = xF->data.f;
+    float *r = xF->data.f + size;
+    float *hbar = xF->data.f + 2 * size;
+    for (int i = 0; i < size; i++) {
+        r[i] *= istate->data.f[i];
     }
     cblas_sgemv(CblasColMajor, CblasTrans, sW2->nr, sW2->nc, 1.0, sW2->data.f,
                 sW2->nrq * 4, (float *)r, 1, 1.0, (float *)hbar, 1);
-    for (int i = 0; i < sizeq; i++) {
-        hbar[i] = tanhfv(hbar[i]);
+    for (int i = 0; i < size; i++) {
+        hbar[i] = tanhf(hbar[i]);
     }
 
-    const __m128 ones = _mm_set1_ps(1.0f);
-    for (int i = 0; i < sizeq; i++) {
-        ostate->data.v[i] = z[i] * istate->data.v[i] + (ones - z[i]) * hbar[i];
+    for (int i = 0; i < size; i++) {
+        ostate->data.f[i] = z[i] * istate->data.f[i] + (1.0 - z[i]) * hbar[i];
     }
 }
 
