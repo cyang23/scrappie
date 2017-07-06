@@ -36,6 +36,10 @@ static inline float logisticf(float x) {
     return 1.0 / (1.0 + expf(-x));
 }
 
+static inline float eluf(float x){
+    return (x >= 0.0f) ? x : expm1f(x);
+}
+
 
 // Constants for fast exp approximation.  See Schraudolph (1999)
 #    define _A 12102203.161561485f
@@ -77,6 +81,10 @@ static inline float fast_tanhf(float x) {
     return y + y - 1.0;
 }
 
+static inline float fast_eluf(float x){
+    return (x >= 0.0f) ? x : (fast_expf(x) - 1.0);
+}
+
 static inline __m128 __attribute__ ((__always_inline__)) expfv(__m128 x) {
     __v4sf y = (__v4sf) x;
     return (__m128) exp_ps(y);
@@ -89,6 +97,12 @@ static inline __m128 __attribute__ ((__always_inline__)) logisticfv(__m128 x) {
 static inline __m128 __attribute__ ((__always_inline__)) tanhfv(__m128 x) {
     const __m128 y = logisticfv(_mm_add_ps(x, x));
     return _mm_sub_ps(_mm_add_ps(y, y), _mm_setone_ps());
+}
+
+static inline __m128 __attribute__ ((__always_inline__)) elufv(__m128 x) {
+    const __m128 y = expfv(x) - _mm_setone_ps();
+    const __m128 mask = _mm_cmpge_ps(x, _mm_setzero_ps());
+    return _mm_or_ps(_mm_and_ps(mask, x),  _mm_andnot_ps(mask, y));
 }
 
 static inline __m128 fast_logfv(__m128 x) {

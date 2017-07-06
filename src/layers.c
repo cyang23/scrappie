@@ -51,6 +51,19 @@ void log_activation_inplace(scrappie_matrix C) {
     }
 }
 
+/**  Apply ELU activation function to a matrix element-wise
+ *  @param C Matrix
+ *
+ **/
+void elu_activation_inplace(scrappie_matrix C) {
+    for (int c = 0; c < C->nc; ++c) {
+        const size_t offset = c * C->nrq;
+        for (int r = 0; r < C->nrq; ++r) {
+            C->data.v[offset + r] = elufv(C->data.v[offset + r]);
+        }
+    }
+}
+
 scrappie_matrix window(const scrappie_matrix input, int w, int stride) {
     RETURN_NULL_IF(NULL == input, NULL);
     assert(w > 0);
@@ -356,6 +369,7 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
     assert(NULL != bias);
     assert(x->nr == xW->nr);
     const int size = istate->nr;
+    assert(size % 4 == 0);  // Vectorisation assumes size divisible by 4
     assert(3 * size == xW->nc);
     assert(size == sW->nr);
     assert(2 * size == sW->nc);
@@ -519,7 +533,7 @@ void lstm_step(const scrappie_matrix xAffine, const scrappie_matrix out_prev,
     cblas_sgemv(CblasColMajor, CblasTrans, sW->nr, sW->nc, 1.0, sW->data.f,
                 sW->nrq * 4, out_prev->data.f, 1, 1.0, xF->data.f, 1);
 
-    assert((size % 4) == 0);
+    assert(size % 4 == 0);  // Vectorisation assumes size divisible by 4
     const int sizeq = size / 4;
     for (int i = 0; i < sizeq; i++) {
         // Forget gate
