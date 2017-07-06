@@ -49,26 +49,22 @@ extern const char *argp_program_bug_address;
 static char doc[] = "Scrappie basecaller -- basecall from raw signal";
 static char args_doc[] = "fast5 [fast5 ...]";
 static struct argp_option options[] = {
-    {"limit", 'l', "nreads", 0,
-     "Maximum number of reads to call (0 is unlimited)"},
-    {"min_prob", 'm', "probability", 0,
-     "Minimum bound on probability of match"},
-    {"outformat", 'o', "format", 0, "Format to output reads (FASTA or SAM)"},
-    {"rgr", 'r', 0, 0, "Use rGr model"},
-    {"no-rgr", 5, 0, OPTION_ALIAS, "Use default model"},
-    {"skip", 's', "penalty", 0, "Penalty for skipping a base"},
-    {"trim", 't', "start:end", 0, "Number of samples to trim, as start:end"},
-    {"slip", 1, 0, 0, "Use slipping"},
-    {"no-slip", 2, 0, OPTION_ALIAS, "Disable slipping"},
-    // Currently disabled
-    //{"dump", 4, "filename", 0, "Dump annotated blocks to HDF5 file"},
-    {"licence", 10, 0, 0, "Print licensing information"},
-    {"license", 11, 0, OPTION_ALIAS, "Print licensing information"},
-    {"hdf5-compression", 12, "level", 0,
-     "Gzip compression level for HDF5 output (0:off, 1: quickest, 9: best)"},
-    {"hdf5-chunk", 13, "size", 0, "Chunk size for HDF5 output"},
-    {"segmentation", 3, "chunk:percentile", 0,
-     "Chunk size and percentile for variance based segmentation"},
+	{"limit", 'l', "nreads", 0, "Maximum number of reads to call (0 is unlimited)"},
+	{"min_prob", 'm', "probability", 0, "Minimum bound on probability of match"},
+	{"outformat", 'o', "format", 0, "Format to output reads (FASTA or SAM)"},
+	{"rgr", 'r', 0, 0, "Use rGr model"},
+	{"no-rgr", 5, 0, OPTION_ALIAS, "Use default model"},
+	{"skip", 's', "penalty", 0, "Penalty for skipping a base"},
+	{"trim", 't', "start:end", 0, "Number of samples to trim, as start:end"},
+	{"slip", 1, 0, 0, "Use slipping"},
+	{"no-slip", 2, 0, OPTION_ALIAS, "Disable slipping"},
+	// Currently disabled
+	//{"dump", 4, "filename", 0, "Dump annotated blocks to HDF5 file"},
+	{"licence", 10, 0, 0, "Print licensing information"},
+	{"license", 11, 0, OPTION_ALIAS, "Print licensing information"},
+	{"hdf5-compression", 12, "level", 0, "Gzip compression level for HDF5 output (0:off, 1: quickest, 9: best)"},
+	{"hdf5-chunk", 13, "size", 0, "Chunk size for HDF5 output"},
+	{"segmentation", 3, "chunk:percentile", 0, "Chunk size and percentile for variance based segmentation"},
 #if defined(_OPENMP)
     {"threads", '#', "nreads", 0, "Number of reads to call in parallel"},
 #endif
@@ -78,36 +74,36 @@ static struct argp_option options[] = {
 enum format { FORMAT_FASTA, FORMAT_SAM };
 
 struct arguments {
-    int limit;
-    float min_prob;
-    enum format outformat;
-    float skip_pen;
-    bool use_slip;
-    int trim_start, trim_end;
-    int varseg_chunk;
-    float varseg_thresh;
-    char *dump;
-    int compression_level;
-    int compression_chunk_size;
-    bool use_rgr;
-    char **files;
+	int limit;
+	float min_prob;
+	enum format outformat;
+	float skip_pen;
+	bool use_slip;
+	int trim_start, trim_end;
+	int varseg_chunk;
+	float varseg_thresh;
+	char * dump;
+	int compression_level;
+	int compression_chunk_size;
+	bool use_rgr;
+	char ** files;
 };
 
 static struct arguments args = {
-    .limit = 0,
-    .min_prob = 1e-5,
-    .outformat = FORMAT_FASTA,
-    .skip_pen = 0.0,
-    .use_slip = false,
-    .trim_start = 200,
-    .trim_end = 50,
-    .varseg_chunk = 100,
-    .varseg_thresh = 0.7,
-    .dump = NULL,
-    .compression_level = 1,
-    .compression_chunk_size = 200,
-    .use_rgr = false,
-    .files = NULL
+	.limit = 0,
+	.min_prob = 1e-5,
+	.outformat = FORMAT_FASTA,
+	.skip_pen = 0.0,
+	.use_slip = false,
+	.trim_start = 200,
+	.trim_end = 50,
+	.varseg_chunk = 100,
+	.varseg_thresh = 0.7,
+	.dump = NULL,
+	.compression_level = 1,
+	.compression_chunk_size = 200,
+	.use_rgr = false,
+	.files = NULL
 };
 
 static error_t parse_arg(int key, char * arg, struct  argp_state * state){
@@ -277,102 +273,96 @@ static int fprintf_sam(FILE * fp, const char *readname,
                    res.basecall);
 }
 
-int main_raw(int argc, char *argv[]) {
-#if defined(_OPENMP)
-    omp_set_nested(1);
-#endif
-    argp_parse(&argp, argc, argv, 0, 0, NULL);
+int main_raw(int argc, char * argv[]){
+	#if defined(_OPENMP)
+		omp_set_nested(1);
+	#endif
+	argp_parse(&argp, argc, argv, 0, 0, NULL);
 
-    hid_t hdf5out = -1;
-    if (NULL != args.dump) {
-        hdf5out = H5Fopen(args.dump, H5F_ACC_RDWR, H5P_DEFAULT);
-        if (hdf5out < 0) {
-            hdf5out =
-                H5Fcreate(args.dump, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
-        }
-    }
+	hid_t hdf5out = -1;
+	if(NULL != args.dump){
+		hdf5out = H5Fopen(args.dump, H5F_ACC_RDWR, H5P_DEFAULT);
+		if(hdf5out < 0){
+			hdf5out = H5Fcreate(args.dump, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+		}
+	}
 
-    int nfile = 0;
-    for (; args.files[nfile]; nfile++) ;
+	int nfile = 0;
+	for( ; args.files[nfile] ; nfile++);
 
-    int reads_started = 0;
-    const int reads_limit = args.limit;
-#pragma omp parallel for schedule(dynamic)
-    for (int fn = 0; fn < nfile; fn++) {
-        if (reads_limit > 0 && reads_started >= reads_limit) {
-            continue;
-        }
-        //  Iterate through all files and directories on command line.
-        //  Nested parallelism for OpenMP is enabled so worker threads are used for all open
-        // directories but this less than optimal since many directories may be open at once.
-        glob_t globbuf;
-        {
-            // Find all files matching commandline argument using system glob
-            const size_t rootlen = strlen(args.files[fn]);
-            char *globpath = calloc(rootlen + 9, sizeof(char));
-            memcpy(globpath, args.files[fn], rootlen * sizeof(char));
-            {
-                DIR *dirp = opendir(args.files[fn]);
-                if (NULL != dirp) {
-                    // If filename is a directory, add wildcard to find all fast5 files within it
-                    memcpy(globpath + rootlen, "/*.fast5", 8 * sizeof(char));
-                    closedir(dirp);
-                }
-            }
-            int globret = glob(globpath, GLOB_NOSORT, NULL, &globbuf);
-            free(globpath);
-            if (0 != globret) {
-                globfree(&globbuf);
-                continue;
-            }
-        }
-#pragma omp parallel for schedule(dynamic)
-        for (int fn2 = 0; fn2 < globbuf.gl_pathc; fn2++) {
-            if (reads_limit > 0 && reads_started >= reads_limit) {
-                continue;
-            }
-#pragma omp atomic
-            reads_started += 1;
+	int reads_started = 0;
+	const int reads_limit = args.limit;
+	#pragma omp parallel for schedule(dynamic)
+	for(int fn=0 ; fn < nfile ; fn++){
+		if(reads_limit > 0 && reads_started >= reads_limit){
+			continue;
+		}
+		//  Iterate through all files and directories on command line.
+		//  Nested parallelism for OpenMP is enabled so worker threads are used for all open
+		// directories but this less than optimal since many directories may be open at once.
+		glob_t globbuf;
+		{
+			// Find all files matching commandline argument using system glob
+			const size_t rootlen = strlen(args.files[fn]);
+			char * globpath = calloc(rootlen + 9, sizeof(char));
+			memcpy(globpath, args.files[fn], rootlen * sizeof(char));
+			{
+				DIR * dirp = opendir(args.files[fn]);
+				if(NULL != dirp){
+					// If filename is a directory, add wildcard to find all fast5 files within it
+					memcpy(globpath + rootlen, "/*.fast5", 8 * sizeof(char));
+					closedir(dirp);
+				}
+			}
+			int globret = glob(globpath, GLOB_NOSORT, NULL, &globbuf);
+			free(globpath);
+			if(0 != globret){
+				globfree(&globbuf);
+				continue;
+			}
+		}
+		#pragma omp parallel for schedule(dynamic)
+		for(int fn2=0 ; fn2 < globbuf.gl_pathc ; fn2++){
+			if(reads_limit > 0 && reads_started >= reads_limit){
+				continue;
+			}
+			#pragma omp atomic
+			reads_started += 1;
 
-            char *filename = globbuf.gl_pathv[fn2];
-            struct _raw_basecall_info res =
-                calculate_post(filename, args.use_rgr);
-            if (NULL == res.basecall) {
-                warnx("No basecall returned for %s", filename);
-                continue;
-            }
-#pragma omp critical(sequence_output)
-            {
-                switch (args.outformat) {
-                case FORMAT_FASTA:
-                    fprintf_fasta(stdout,
-                                  strip_filename_extension(basename(filename)),
-                                  res);
-                    break;
-                case FORMAT_SAM:
-                    fprintf_sam(stdout,
-                                strip_filename_extension(basename(filename)),
-                                res);
-                    break;
-                default:
-                    errx(EXIT_FAILURE, "Unrecognised output format");
-                }
+			char * filename = globbuf.gl_pathv[fn2];
+			struct _raw_basecall_info res = calculate_post(filename, args.use_rgr);
+			if(NULL == res.basecall){
+				warnx("No basecall returned for %s", filename);
+				continue;
+			}
 
-                if (hdf5out >= 0) {
-                    write_annotated_raw(hdf5out, basename(filename), res.rt,
-                                        args.compression_chunk_size,
-                                        args.compression_level);
-                }
-            }
-            free(res.rt.raw);
-            free(res.basecall);
-            free(res.pos);
-        }
-        globfree(&globbuf);
-    }
+			#pragma omp critical(sequence_output)
+			{
+				switch(args.outformat){
+				case FORMAT_FASTA:
+					fprintf_fasta(stdout, strip_filename_extension(basename(filename)), res);
+					break;
+				case FORMAT_SAM:
+					fprintf_sam(stdout, strip_filename_extension(basename(filename)), res);
+					break;
+				default:
+					errx(EXIT_FAILURE, "Unrecognised output format");
+				}
 
-    if (hdf5out >= 0) {
-        H5Fclose(hdf5out);
-    }
-    return EXIT_SUCCESS;
+				if(hdf5out >= 0){
+					write_annotated_raw(hdf5out, basename(filename), res.rt,
+						args.compression_chunk_size, args.compression_level);
+				}
+			}
+			free(res.rt.raw);
+			free(res.basecall);
+			free(res.pos);
+		}
+		globfree(&globbuf);
+	}
+
+	if(hdf5out >= 0){
+		H5Fclose(hdf5out);
+	}
+	return EXIT_SUCCESS;
 }

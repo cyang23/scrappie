@@ -12,6 +12,7 @@ void tanh_activation_inplace(scrappie_matrix C);
 void exp_activation_inplace(scrappie_matrix C);
 void log_activation_inplace(scrappie_matrix C);
 
+
 scrappie_matrix window(const scrappie_matrix input, int w, int stride);
 scrappie_matrix Convolution(const scrappie_matrix X, const scrappie_matrix W,
                             const scrappie_matrix b, int stride,
