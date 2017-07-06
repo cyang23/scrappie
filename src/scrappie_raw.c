@@ -53,7 +53,7 @@ static struct argp_option options[] = {
 	{"min_prob", 'm', "probability", 0, "Minimum bound on probability of match"},
 	{"outformat", 'o', "format", 0, "Format to output reads (FASTA or SAM)"},
 	{"rgr", 'r', 0, 0, "Use rGr model"},
-	{"no-rgr", 5, 0, OPTION_ALIAS, "Use default model"},
+	{"no-rgr", 5, 0, OPTION_ALIAS, "Use nanonet-raw model"},
 	{"skip", 's', "penalty", 0, "Penalty for skipping a base"},
 	{"trim", 't', "start:end", 0, "Number of samples to trim, as start:end"},
 	{"slip", 1, 0, 0, "Use slipping"},
@@ -102,7 +102,7 @@ static struct arguments args = {
 	.dump = NULL,
 	.compression_level = 1,
 	.compression_chunk_size = 200,
-	.use_rgr = false,
+	.use_rgr = true,
 	.files = NULL
 };
 
