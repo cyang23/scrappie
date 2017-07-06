@@ -98,10 +98,10 @@ scrappie_matrix nanonet_features_from_events(const event_table evtbl,
 }
 
 scrappie_matrix nanonet_features_from_raw(const raw_table signal) {
-    ASSERT_OR_RETURN_NULL(signal.n > 0 && NULL != signal.raw, NULL);
+    RETURN_NULL_IF(signal.n > 0 && NULL != signal.raw, NULL);
     const size_t nsample = signal.end - signal.start;
     scrappie_matrix sigmat = make_scrappie_matrix(1, nsample);
-    ASSERT_OR_RETURN_NULL(NULL != sigmat, NULL);
+    RETURN_NULL_IF(NULL != sigmat, NULL);
 
     const size_t offset = signal.start;
     for (size_t i = 0; i < nsample; i++) {
