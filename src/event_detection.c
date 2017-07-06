@@ -37,9 +37,9 @@ typedef Detector *DetectorPtr;
  **/
 void compute_sum_sumsq(const float *data, double *sum,
                        double *sumsq, size_t d_length) {
-    RETURN_NULL_IF(NULL != data, );
-    RETURN_NULL_IF(NULL != sum, );
-    RETURN_NULL_IF(NULL != sumsq, );
+    RETURN_NULL_IF(NULL == data, );
+    RETURN_NULL_IF(NULL == sum, );
+    RETURN_NULL_IF(NULL == sumsq, );
     assert(d_length > 0);
 
     sum[0] = 0.0f;
@@ -63,11 +63,11 @@ float *compute_tstat(const double *sum, const double *sumsq,
                      size_t d_length, size_t w_length) {
     assert(d_length > 0);
     assert(w_length > 0);
-    RETURN_NULL_IF(NULL != sum, NULL);
-    RETURN_NULL_IF(NULL != sumsq, NULL);
+    RETURN_NULL_IF(NULL == sum, NULL);
+    RETURN_NULL_IF(NULL == sumsq, NULL);
 
     float *tstat = calloc(d_length, sizeof(float));
-    RETURN_NULL_IF(NULL != tstat, NULL);
+    RETURN_NULL_IF(NULL == tstat, NULL);
 
     const float eta = FLT_MIN;
     const float w_lengthf = (float)w_length;
@@ -124,14 +124,14 @@ size_t *short_long_peak_detector(DetectorPtr short_detector,
                                  DetectorPtr long_detector,
                                  const float peak_height) {
     assert(short_detector->signal_length == long_detector->signal_length);
-    RETURN_NULL_IF(NULL != short_detector->signal, NULL);
-    RETURN_NULL_IF(NULL != long_detector->signal, NULL);
+    RETURN_NULL_IF(NULL == short_detector->signal, NULL);
+    RETURN_NULL_IF(NULL == long_detector->signal, NULL);
 
     const size_t ndetector = 2;
     DetectorPtr detectors[] = { short_detector, long_detector };
 
     size_t *peaks = calloc(short_detector->signal_length, sizeof(size_t));
-    RETURN_NULL_IF(NULL != peaks, NULL);
+    RETURN_NULL_IF(NULL == peaks, NULL);
 
     size_t peak_count = 0;
     for (size_t i = 0; i < short_detector->signal_length; i++) {
@@ -219,8 +219,8 @@ event_t create_event(size_t start, size_t end, double const *sums,
     event_t event = { 0 };
     event.pos = -1;
     event.state = -1;
-    RETURN_NULL_IF(NULL != sums, event);
-    RETURN_NULL_IF(NULL != sumsqs, event);
+    RETURN_NULL_IF(NULL == sums, event);
+    RETURN_NULL_IF(NULL == sumsqs, event);
    
     event.start = (double)start;
     event.length = (float)(end - start);
@@ -235,9 +235,9 @@ event_t create_event(size_t start, size_t end, double const *sums,
 event_table create_events(size_t const *peaks, double const *sums,
                           double const *sumsqs, size_t nsample) {
     event_table event_tbl = { 0 };
-    RETURN_NULL_IF(NULL != sums, event_tbl);
-    RETURN_NULL_IF(NULL != sumsqs, event_tbl);
-    RETURN_NULL_IF(NULL != peaks, event_tbl);
+    RETURN_NULL_IF(NULL == sums, event_tbl);
+    RETURN_NULL_IF(NULL == sumsqs, event_tbl);
+    RETURN_NULL_IF(NULL == peaks, event_tbl);
 
     // Count number of events found
     size_t n = 0;
@@ -248,7 +248,7 @@ event_table create_events(size_t const *peaks, double const *sums,
     }
 
     event_tbl.event = calloc(n, sizeof(event_t));
-    RETURN_NULL_IF(NULL != event_tbl.event, event_tbl);
+    RETURN_NULL_IF(NULL == event_tbl.event, event_tbl);
 
     event_tbl.n = n;
     event_tbl.end = event_tbl.n;
@@ -274,7 +274,7 @@ event_table detect_events(raw_table const rt) {
     double const peak_height = 0.2;     // TODO(semen): pass on the cmd line
 
     event_table event_tbl = { 0 };
-    RETURN_NULL_IF(NULL != rt.raw, event_tbl);
+    RETURN_NULL_IF(NULL == rt.raw, event_tbl);
 
     double *sums = calloc(rt.n + 1, sizeof(double));
     double *sumsqs = calloc(rt.n + 1, sizeof(double));

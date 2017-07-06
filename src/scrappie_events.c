@@ -258,10 +258,10 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
 static struct argp argp = { options, parse_arg, args_doc, doc };
 
 static struct _bs calculate_post(char *filename) {
-    RETURN_NULL_IF(NULL != filename, _bs_null);
+    RETURN_NULL_IF(NULL == filename, _bs_null);
 
     raw_table rt = read_raw(filename, true);
-    RETURN_NULL_IF(NULL != rt.raw, _bs_null);
+    RETURN_NULL_IF(NULL == rt.raw, _bs_null);
 
     const size_t nsample = rt.end - rt.start;
     if (nsample <= args.trim_end + args.trim_start) {

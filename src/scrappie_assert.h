@@ -7,12 +7,12 @@
 
 #    ifdef ABORT_ON_NULL
 #        define RETURN_NULL_IF(A, B) \
-		if(!(A)){  	\
+		if (A) {  	\
 			fprintf(stderr, "Failure at %s : %d", __FILE__, __LINE__);	\
 			abort();	\
 		}
 #    else
-#        define RETURN_NULL_IF(A, B) if(!(A)){ return B; }
+#        define RETURN_NULL_IF(A, B) if (A) { return B; }
 #    endif
 
 #endif                          /* SCRAPPIE_ASSERT_H */
