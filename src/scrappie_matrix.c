@@ -108,6 +108,10 @@ bool validate_scrappie_matrix(scrappie_matrix mat, float lower,
                               const float upper, const float maskval,
                               const bool only_finite, const char *file,
                               const int line) {
+#ifdef NDEBUG
+    return true;
+}
+#else
     if (NULL == mat) {
         return false;
     }
@@ -181,6 +185,7 @@ bool validate_scrappie_matrix(scrappie_matrix mat, float lower,
 
     return true;
 }
+#endif /* NDEBUG */
 
 /**  Check whether two matrices are equal within a given tolerance
  *
@@ -441,6 +446,10 @@ int argmin_scrappie_matrix(const scrappie_matrix x) {
 
 bool validate_vector(float *vec, const float n, const float lower,
                      const float upper, const char *file, const int line) {
+#ifdef NDEBUG
+    return true;
+}
+#else
     if (NULL == vec) {
         return false;
     }
@@ -467,9 +476,14 @@ bool validate_vector(float *vec, const float n, const float lower,
 
     return true;
 }
+#endif /* NDEBUG */
 
 bool validate_ivector(int *vec, const int n, const int lower, const int upper,
                       const char *file, const int line) {
+#ifdef NDEBUG
+    return true;
+}
+#else
     if (NULL == vec) {
         return false;
     }
@@ -493,3 +507,4 @@ bool validate_ivector(int *vec, const int n, const int lower, const int upper,
 
     return true;
 }
+#endif /* NDEBUG */
