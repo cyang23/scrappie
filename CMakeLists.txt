@@ -128,7 +128,7 @@ set (ENV{OPENBLAS_NUM_THREADS} 1)
 
 add_test(NAME unittest WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/test/ COMMAND scrappie_unittest)
 add_test(test_events_call scrappie events --threads 1 ${READSDIR})
-add_test(test_raw_call scrappie raw --threads 1 ${READSDIR})
+add_test(test_raw_call scrappie raw --no-rgr --threads 1 ${READSDIR})
 add_test(test_rawrgr_call scrappie raw --rgr --threads 1 ${READSDIR})
 add_test(test_licence scrappie licence)
 add_test(test_licence scrappie license)
