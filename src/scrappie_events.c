@@ -281,6 +281,7 @@ static struct _bs calculate_post(char *filename) {
     event_table et = detect_events(rt);
 
     if (NULL == et.event) {
+        free(rt.raw);
         return _bs_null;
     }
 
@@ -290,6 +291,7 @@ static struct _bs calculate_post(char *filename) {
             ("Too few events in %s to call (%zu after segmentation, originally %lu).",
              filename, nevent, et.n);
         free(et.event);
+        free(rt.raw);
         return _bs_null;
     }
     et.start += args.trim_start;
@@ -298,6 +300,7 @@ static struct _bs calculate_post(char *filename) {
     scrappie_matrix post = nanonet_posterior(et, args.min_prob, true);
     if (NULL == post) {
         free(et.event);
+        free(rt.raw);
         return _bs_null;
     }
     const int nev = post->nc;
@@ -329,6 +332,7 @@ static struct _bs calculate_post(char *filename) {
 
     free(pos);
     free(history_state);
+    free(rt.raw);
 
     return (struct _bs) {
     score, nev, basecall, et};
