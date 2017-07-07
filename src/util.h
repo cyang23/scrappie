@@ -100,8 +100,12 @@ static inline __m128 __attribute__ ((__always_inline__)) tanhfv(__m128 x) {
 }
 
 static inline __m128 __attribute__ ((__always_inline__)) elufv(__m128 x) {
-    const __m128 y = expfv(x) - _mm_setone_ps();
+    if(0 == _mm_movemask_ps(x)){
+        // All positive, early return.
+        return x;
+    }
     const __m128 mask = _mm_cmpge_ps(x, _mm_setzero_ps());
+    const __m128 y = expfv(x) - _mm_setone_ps();
     return _mm_or_ps(_mm_and_ps(mask, x),  _mm_andnot_ps(mask, y));
 }
 
