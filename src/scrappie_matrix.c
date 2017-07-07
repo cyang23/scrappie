@@ -344,28 +344,26 @@ scrappie_matrix affine_map2(const scrappie_matrix Xf, const scrappie_matrix Xb,
     return C;
 }
 
-__m128 mask(int i) {
-    return (__m128) (__v4sf) {
-    i >= 1, i >= 2, i >= 3, 0.0f};
-}
-
 void row_normalise_inplace(scrappie_matrix C) {
     if (NULL == C) {
         // Input NULL due to earlier failure.  Propagate
         return;
     }
+    const int i = C->nrq * 4 - C->nr;
+    const __m128 mask = _mm_castsi128_ps(0xffffffff * _mm_set_epi32(i >= 1, i >= 2, i >= 3, 0));
     for (int col = 0; col < C->nc; col++) {
         const size_t offset = col * C->nrq;
-        __m128 sum = _mm_setzero_ps();
-        for (int row = 0; row < C->nrq; row++) {
+        __m128 sum = C->data.v[offset];
+        for (int row = 1; row < C->nrq; row++) {
             sum += C->data.v[offset + row];
         }
-        sum -= C->data.v[offset + C->nrq - 1] * mask(C->nr - C->nrq * 4);
+        sum -= _mm_and_ps(C->data.v[offset + C->nrq - 1], mask);
         const __m128 psum = _mm_hadd_ps(sum, sum);
         const __m128 tsum = _mm_hadd_ps(psum, psum);
 
+        const __m128 tsum_recip = _mm_set1_ps(1.0f) / tsum;
         for (int row = 0; row < C->nrq; row++) {
-            C->data.v[offset + row] /= tsum;
+            C->data.v[offset + row] *= tsum_recip;
         }
     }
 }

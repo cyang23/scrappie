@@ -92,7 +92,7 @@ set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -Wall -DABORT_ON_NULL -Wno-unused-fun
 include (CheckCCompilerFlag)
 check_c_compiler_flag ("-fopenmp" HAS_OPENMP)
 if (HAS_OPENMP)
-	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
 endif (HAS_OPENMP)
 
 
