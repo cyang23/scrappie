@@ -130,7 +130,7 @@ scrappie_matrix nanonet_rgr_posterior(const raw_table signal, float min_prob,
     scrappie_matrix raw_mat = nanonet_features_from_raw(signal);
     scrappie_matrix conv =
         Convolution(raw_mat, conv_rgr_W, conv_rgr_b, conv_rgr_stride, NULL);
-    tanh_activation_inplace(conv);
+    elu_activation_inplace(conv);
     raw_mat = free_scrappie_matrix(raw_mat);
     //  First GRU layer
     scrappie_matrix gruB1 =
