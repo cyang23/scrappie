@@ -58,8 +58,6 @@ static struct argp_option options[] = {
     {"trim", 't', "start:end", 0, "Number of events to trim, as start:end"},
     {"slip", 1, 0, 0, "Use slipping"},
     {"no-slip", 2, 0, OPTION_ALIAS, "Disable slipping"},
-    {"segmentation", 3, "group:summary", 0,
-     "Fast5 group from which to read segmentation"},
     {"dump", 4, "filename", 0, "Dump annotated events to HDF5 file"},
     {"albacore", 8, 0, 0, "Assume fast5 have been called using Albacore"},
     {"no-albacore", 9, 0, OPTION_ALIAS,
@@ -90,8 +88,6 @@ struct arguments {
     int trim_start, trim_end;
     int varseg_chunk;
     float varseg_thresh;
-    char *segloc1;
-    char *segloc2;
     char *dump;
     bool albacore;
     int compression_level;
@@ -111,8 +107,6 @@ static struct arguments args = {
     .trim_end = 50,
     .varseg_chunk = 100,
     .varseg_thresh = 0.7,
-    .segloc1 = "Segmentation",
-    .segloc2 = "segmentation",
     .dump = NULL,
     .albacore = false,
     .compression_level = 1,
@@ -164,17 +158,6 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
         break;
     case 2:
         args.use_slip = false;
-        break;
-    case 3:
-        args.segloc1 = strtok(arg, ":");
-        char *next_token = strtok(NULL, ":");
-        if (NULL == next_token) {
-            warnx
-                ("Segmentation should be of form 'loc1:loc2' but loc2 not found.  Going to use default of %s.",
-                 args.segloc2);
-        } else {
-            args.segloc2 = next_token;
-        }
         break;
     case 4:
         args.dump = arg;
