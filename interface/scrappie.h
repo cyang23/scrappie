@@ -12,17 +12,23 @@ extern "C" {
     typedef struct {
         double start;
         float length;
-        float mean, stdv;
-        int pos, state;
+        float mean;
+        float stdv;
+        int pos;
+        int state;
     } event_t;
 
     typedef struct {
-        size_t n, start, end;
+        size_t n;
+        size_t start;
+        size_t end;
         event_t *event;
     } event_table;
 
     typedef struct {
-        size_t n, start, end;
+        size_t n;
+        size_t start;
+        size_t end;
         float *raw;
     } raw_table;
 
