@@ -79,10 +79,9 @@ Scrappie basecaller -- basecall via events
   -m, --min_prob=probability Minimum bound on probability of match
   -o, --outformat=format     Format to output reads (FASTA or SAM)
   -s, --skip=penalty         Penalty for skipping a base
-      --segmentation=group:summary
-                             Fast5 group from which to read segmentation
-      --segmentation-analysis=number
-                             Analysis number to read segmentation from
+      --segmentation=chunk:percentile
+                             Chunk size and percentile for variance based
+                             segmentation
       --slip, --no-slip      Use slipping
   -t, --trim=start:end       Number of events to trim, as start:end
   -?, --help                 Give this help list
@@ -108,27 +107,12 @@ Scrappie basecaller -- basecall from raw signal
       --segmentation=chunk:percentile
                              Chunk size and percentile for variance based
                              segmentation
-
       --slip, --no-slip      Use slipping
   -t, --trim=start:end       Number of samples to trim, as start:end
   -?, --help                 Give this help list
       --usage                Give a short usage message
   -V, --version              Print program version
 ```
-
-## Segmentation
-When calling via events, Scrappie relies on the segmentation already being present in the fast5 file
-and does not do any processing itself.  By default the segmentation is read from 
-`/Analyses/Segmentation_XXX/Summary/segmentation` but other locations can be specified using the
-`--segmenation` option.  
-The default beahviour is equivalent to `--segmentation  Segmentation:segmentation`.
-Other values of historical significance are:
-* `--segmentation Hairpin_Split:split_hairpin`
-* `Segment_Linear:split_hairpin`
-* `Segmentation:split_hairpin`
-
-When no segmentation can be found, all events are used for basecalling.
-
 
 ## Output formats
 Scrappie current supports two ouput formats, FASTA and SAM.  The default format is currently FASTA;
