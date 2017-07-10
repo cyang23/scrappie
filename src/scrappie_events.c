@@ -17,6 +17,7 @@
 #include "event_detection.h"
 #include "networks.h"
 #include "scrappie_assert.h"
+#include "scrappie_common.h"
 #include "scrappie_licence.h"
 #include "util.h"
 
@@ -258,28 +259,10 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
 static struct argp argp = { options, parse_arg, args_doc, doc };
 
 static struct _bs calculate_post(char *filename) {
-    RETURN_NULL_IF(NULL == filename, _bs_null);
-
-    raw_table rt = read_raw(filename, true);
+    raw_table rt = read_trim_and_segment_raw(filename, args.trim_start, args.trim_end, args.varseg_chunk, args.varseg_thresh);
     RETURN_NULL_IF(NULL == rt.raw, _bs_null);
 
-    const size_t nsample = rt.end - rt.start;
-    if (nsample <= args.trim_end + args.trim_start) {
-        warnx("Too few samples in %s to call (%zu, originally %lu).", filename,
-              nsample, rt.n);
-        free(rt.raw);
-        return _bs_null;
-    }
-    rt.start += args.trim_start;
-    rt.end -= args.trim_end;
-
-    range_t segmentation =
-        trim_raw_by_mad(rt, args.varseg_chunk, args.varseg_thresh);
-    rt.start = segmentation.start;
-    rt.end = segmentation.end;
-
     event_table et = detect_events(rt);
-
     if (NULL == et.event) {
         free(rt.raw);
         return _bs_null;
