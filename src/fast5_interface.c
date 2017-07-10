@@ -19,42 +19,6 @@ typedef struct {
     float sample_rate;
 } fast5_raw_scaling;
 
-herr_t group_op_func(hid_t loc_id, const char *name, const H5L_info_t * info,
-                     void *operator_data) {
-    struct _gop_data *gop = (struct _gop_data *)operator_data;
-    if (strncmp(name, gop->prefix, strlen(gop->prefix)) == 0) {
-        const size_t name_l = strlen(name);
-        int analysis_number = atoi(name + name_l - 3);
-        if (analysis_number > gop->latest) {
-            gop->latest = analysis_number;
-        }
-    }
-
-    return 0;
-}
-
-int get_latest_group(hid_t file, const char *root, const char *prefix) {
-    assert(NULL != root);
-    assert(NULL != prefix);
-
-    struct _gop_data gop_data = { prefix, -1 };
-    hid_t grp = H5Gopen(file, root, H5P_DEFAULT);
-    if (grp < 0) {
-        warnx("Failed to open group '%s' at %s:%d.", root, __FILE__, __LINE__);
-        return gop_data.latest;
-    }
-
-    herr_t status =
-        H5Literate(grp, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, group_op_func,
-                   &gop_data);
-    if (status < 0 || gop_data.latest < 0) {
-        warnx("Error trying to find group of form '%s/%s_XXX'.", root, prefix);
-    }
-    H5Gclose(grp);
-
-    return gop_data.latest;
-}
-
 float read_float_attribute(hid_t group, const char *attribute) {
     float val = NAN;
     if (group < 0) {
