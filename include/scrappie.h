@@ -17,12 +17,12 @@ extern "C" {
     } event_t;
 
     typedef struct {
-        unsigned int n, start, end;
+        size_t n, start, end;
         event_t *event;
     } event_table;
 
     typedef struct {
-        unsigned int n, start, end;
+        size_t n, start, end;
         float *raw;
     } raw_table;
 
