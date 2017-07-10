@@ -60,8 +60,6 @@ static struct argp_option options[] = {
     {"no-slip", 2, 0, OPTION_ALIAS, "Disable slipping"},
     {"segmentation", 3, "group:summary", 0,
      "Fast5 group from which to read segmentation"},
-    {"segmentation-analysis", 7, "number", 0,
-     "Analysis number to read segmentation from"},
     {"dump", 4, "filename", 0, "Dump annotated events to HDF5 file"},
     {"albacore", 8, 0, 0, "Assume fast5 have been called using Albacore"},
     {"no-albacore", 9, 0, OPTION_ALIAS,
@@ -83,7 +81,6 @@ enum format { FORMAT_FASTA, FORMAT_SAM };
 
 struct arguments {
     int analysis;
-    int seganalysis;
     bool dwell_correction;
     int limit;
     float min_prob;
@@ -104,7 +101,6 @@ struct arguments {
 
 static struct arguments args = {
     .analysis = -1,
-    .seganalysis = -1,
     .dwell_correction = true,
     .limit = 0,
     .min_prob = 1e-5,
@@ -188,10 +184,6 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state) {
         break;
     case 6:
         args.dwell_correction = false;
-        break;
-    case 7:
-        args.seganalysis = atoi(arg);
-        assert(args.seganalysis >= -1 && args.seganalysis < 1000);
         break;
     case 8:
         args.albacore = true;
