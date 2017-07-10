@@ -25,13 +25,13 @@
 #        define TANHFV tanhfv
 #    endif
 
-#    ifdef FAST_LOGISTICH
+#    ifdef FAST_LOGISTIC
 #        define LOGISTICFV fast_logisticfv
 #    else
 #        define LOGISTICFV logisticfv
 #    endif
 
-#    ifdef FAST_ELUH
+#    ifdef FAST_ELU
 #        define ELUFV fast_elufv
 #    else
 #        define ELUFV elufv

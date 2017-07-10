@@ -17,7 +17,7 @@ void tanh_activation_inplace(scrappie_matrix C) {
     for (int c = 0; c < C->nc; ++c) {
         const size_t offset = c * C->nrq;
         for (int r = 0; r < C->nrq; ++r) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
+            C->data.v[offset + r] = TANHFV(C->data.v[offset + r]);
         }
     }
     (void)validate_scrappie_matrix(C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__);
@@ -59,7 +59,7 @@ void elu_activation_inplace(scrappie_matrix C) {
     for (int c = 0; c < C->nc; ++c) {
         const size_t offset = c * C->nrq;
         for (int r = 0; r < C->nrq; ++r) {
-            C->data.v[offset + r] = elufv(C->data.v[offset + r]);
+            C->data.v[offset + r] = ELUFV(C->data.v[offset + r]);
         }
     }
 }
@@ -391,7 +391,7 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
     cblas_sgemv(CblasColMajor, CblasTrans, sW->nr, sW->nc, 1.0, sW->data.f,
                 sW->nrq * 4, istate->data.f, 1, 1.0, xF->data.f, 1);
     for (int i = 0; i < (sizeq +sizeq); i++) {
-        xF->data.v[i] = logisticfv(xF->data.v[i]);
+        xF->data.v[i] = LOGISTICFV(xF->data.v[i]);
     }
 
     const __m128 *z = xF->data.v;
@@ -403,7 +403,7 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
     cblas_sgemv(CblasColMajor, CblasTrans, sW2->nr, sW2->nc, 1.0, sW2->data.f,
                 sW2->nrq * 4, (float *)r, 1, 1.0, (float *)hbar, 1);
     for (int i = 0; i < sizeq; i++) {
-        hbar[i] = tanhfv(hbar[i]);
+        hbar[i] = TANHFV(hbar[i]);
     }
 
     const __m128 ones = _mm_set1_ps(1.0f);
@@ -539,20 +539,20 @@ void lstm_step(const scrappie_matrix xAffine, const scrappie_matrix out_prev,
     const int sizeq = size / 4;
     for (int i = 0; i < sizeq; i++) {
         // Forget gate
-        __m128 forget = logisticfv(xF->data.v[2 * sizeq + i]
+        __m128 forget = LOGISTICFV(xF->data.v[2 * sizeq + i]
                                    + state->data.v[i] * peep->data.v[sizeq + i])
             * state->data.v[i];
         // Update gate
-        __m128 update = logisticfv(xF->data.v[sizeq + i]
+        __m128 update = LOGISTICFV(xF->data.v[sizeq + i]
                                    + state->data.v[i] * peep->data.v[i])
-            * tanhfv(xF->data.v[i]);
+            * TANHFV(xF->data.v[i]);
         state->data.v[i] = _mm_add_ps(forget, update);
         // Output gate
-        output->data.v[i] = logisticfv(xF->data.v[3 * sizeq + i]
+        output->data.v[i] = LOGISTICFV(xF->data.v[3 * sizeq + i]
                                        +
                                        state->data.v[i] * peep->data.v[2 *
                                                                        sizeq +
                                                                        i])
-            * tanhfv(state->data.v[i]);
+            * TANHFV(state->data.v[i]);
     }
 }
