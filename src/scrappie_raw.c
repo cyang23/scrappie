@@ -83,7 +83,8 @@ struct arguments {
     enum format outformat;
     float skip_pen;
     bool use_slip;
-    int trim_start, trim_end;
+    int trim_start;
+    int trim_end;
     int varseg_chunk;
     float varseg_thresh;
     char *dump;

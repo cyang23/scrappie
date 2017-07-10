@@ -85,7 +85,8 @@ struct arguments {
     enum format outformat;
     float skip_pen;
     bool use_slip;
-    int trim_start, trim_end;
+    int trim_start;
+    int trim_end;
     int varseg_chunk;
     float varseg_thresh;
     char *dump;
@@ -103,7 +104,7 @@ static struct arguments args = {
     .outformat = FORMAT_FASTA,
     .skip_pen = 0.0,
     .use_slip = false,
-    .trim_start = 50,
+    .trim_start = 200,
     .trim_end = 50,
     .varseg_chunk = 100,
     .varseg_thresh = 0.7,
@@ -242,18 +243,6 @@ static struct _bs calculate_post(char *filename) {
         free(rt.raw);
         return _bs_null;
     }
-
-    const size_t nevent = et.end - et.start;
-    if (nevent <= args.trim_start + args.trim_end) {
-        warnx
-            ("Too few events in %s to call (%zu after segmentation, originally %lu).",
-             filename, nevent, et.n);
-        free(et.event);
-        free(rt.raw);
-        return _bs_null;
-    }
-    et.start += args.trim_start;
-    et.end -= args.trim_end;
 
     scrappie_matrix post = nanonet_posterior(et, args.min_prob, true);
     if (NULL == post) {
