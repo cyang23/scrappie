@@ -221,7 +221,7 @@ event_t create_event(size_t start, size_t end, double const *sums,
     event.state = -1;
     RETURN_NULL_IF(NULL == sums, event);
     RETURN_NULL_IF(NULL == sumsqs, event);
-   
+
     event.start = (double)start;
     event.length = (float)(end - start);
     event.mean = (float)(sums[end] - sums[start]) / event.length;
@@ -234,10 +234,10 @@ event_t create_event(size_t start, size_t end, double const *sums,
 
 event_table create_events(size_t const *peaks, double const *sums,
                           double const *sumsqs, size_t nsample) {
-    event_table event_tbl = { 0 };
-    RETURN_NULL_IF(NULL == sums, event_tbl);
-    RETURN_NULL_IF(NULL == sumsqs, event_tbl);
-    RETURN_NULL_IF(NULL == peaks, event_tbl);
+    event_table et = { 0 };
+    RETURN_NULL_IF(NULL == sums, et);
+    RETURN_NULL_IF(NULL == sumsqs, et);
+    RETURN_NULL_IF(NULL == peaks, et);
 
     // Count number of events found
     size_t n = 0;
@@ -247,15 +247,15 @@ event_table create_events(size_t const *peaks, double const *sums,
         }
     }
 
-    event_tbl.event = calloc(n, sizeof(event_t));
-    RETURN_NULL_IF(NULL == event_tbl.event, event_tbl);
+    et.event = calloc(n, sizeof(event_t));
+    RETURN_NULL_IF(NULL == et.event, et);
 
-    event_tbl.n = n;
-    event_tbl.end = event_tbl.n;
+    et.n = n;
+    et.end = et.n;
 
     size_t last_end = 0;
     for (size_t i = 0, j = 0; i < nsample; ++i) {
-        event_t *event = event_tbl.event;
+        event_t *event = et.event;
         if (peaks[i] > 0 && peaks[i] < nsample) {
             event[j] = create_event(last_end, peaks[i], sums, sumsqs, nsample);
             last_end = peaks[i];
@@ -263,7 +263,7 @@ event_table create_events(size_t const *peaks, double const *sums,
         }
     }
 
-    return event_tbl;
+    return et;
 }
 
 event_table detect_events(raw_table const rt) {
@@ -273,8 +273,8 @@ event_table detect_events(raw_table const rt) {
     double const threshold2 = 1.1;
     double const peak_height = 0.2;     // TODO(semen): pass on the cmd line
 
-    event_table event_tbl = { 0 };
-    RETURN_NULL_IF(NULL == rt.raw, event_tbl);
+    event_table et = { 0 };
+    RETURN_NULL_IF(NULL == rt.raw, et);
 
     double *sums = calloc(rt.n + 1, sizeof(double));
     double *sumsqs = calloc(rt.n + 1, sizeof(double));
@@ -313,7 +313,7 @@ event_table detect_events(raw_table const rt) {
         short_long_peak_detector(&short_detector, &long_detector,
                                  peak_height);
 
-    event_tbl = create_events(peaks, sums, sumsqs, rt.n);
+    et = create_events(peaks, sums, sumsqs, rt.n);
 
     free(peaks);
     free(tstat2);
@@ -321,5 +321,5 @@ event_table detect_events(raw_table const rt) {
     free(sumsqs);
     free(sums);
 
-    return event_tbl;
+    return et;
 }
