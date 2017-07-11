@@ -136,7 +136,7 @@ raw_table read_raw(const char *filename, bool scale_to_pA) {
 }
 
 void write_annotated_events(hid_t hdf5file, const char *readname,
-                            const event_table ev, hsize_t chunk_size,
+                            const event_table et, hsize_t chunk_size,
                             int compression_level) {
     assert(compression_level >= 0 && compression_level <= 9);
     // Memory representation
@@ -167,7 +167,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
     H5Tinsert(filetype, "pos", 4 * 4, H5T_STD_I32LE);
 
     // Create dataset
-    const hsize_t dims = ev.n;
+    const hsize_t dims = et.n;
     hid_t space = H5Screate_simple(1, &dims, NULL);
     if (space < 0) {
         warnx("Failed to allocate dataspace for event table %s:%d.", __FILE__,
@@ -199,7 +199,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
     }
     // Write data
     herr_t writeret =
-        H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, ev.event);
+        H5Dwrite(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, et.event);
     if (writeret < 0) {
         warnx("Failed to write dataset for event table %s:%d.", __FILE__,
               __LINE__);
