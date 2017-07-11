@@ -1,5 +1,6 @@
 // Needed for mkstemp and fdopen
 #define _BSD_SOURCE 1
+#define _POSIX_SOURCE 1
 
 #include "scrappie_matrix_util.h"
 

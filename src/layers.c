@@ -17,7 +17,7 @@ void tanh_activation_inplace(scrappie_matrix C) {
     for (int c = 0; c < C->nc; ++c) {
         const size_t offset = c * C->nrq;
         for (int r = 0; r < C->nrq; ++r) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
+            C->data.v[offset + r] = TANHFV(C->data.v[offset + r]);
         }
     }
     (void)validate_scrappie_matrix(C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__);
@@ -47,6 +47,19 @@ void log_activation_inplace(scrappie_matrix C) {
         const size_t offset = c * C->nrq;
         for (int r = 0; r < C->nrq; ++r) {
             C->data.v[offset + r] = LOGFV(C->data.v[offset + r]);
+        }
+    }
+}
+
+/**  Apply ELU activation function to a matrix element-wise
+ *  @param C Matrix
+ *
+ **/
+void elu_activation_inplace(scrappie_matrix C) {
+    for (int c = 0; c < C->nc; ++c) {
+        const size_t offset = c * C->nrq;
+        for (int r = 0; r < C->nrq; ++r) {
+            C->data.v[offset + r] = ELUFV(C->data.v[offset + r]);
         }
     }
 }
@@ -191,12 +204,7 @@ scrappie_matrix feedforward_tanh(const scrappie_matrix X,
     C = affine_map(X, W, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
-        }
-    }
+    tanh_activation_inplace(C);
 
     assert(validate_scrappie_matrix
            (C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
@@ -209,12 +217,7 @@ scrappie_matrix feedforward_exp(const scrappie_matrix X,
     C = affine_map(X, W, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = EXPFV(C->data.v[offset + r]);
-        }
-    }
+    exp_activation_inplace(C);
 
     assert(validate_scrappie_matrix
            (C, 0.0, NAN, 1.0, true, __FILE__, __LINE__));
@@ -241,15 +244,9 @@ scrappie_matrix feedforward2_tanh(const scrappie_matrix Xf,
     C = affine_map2(Xf, Xb, Wf, Wb, b, C);
     RETURN_NULL_IF(NULL == C, NULL);
 
-    for (int c = 0; c < C->nc; c++) {
-        const size_t offset = c * C->nrq;
-        for (int r = 0; r < C->nrq; r++) {
-            C->data.v[offset + r] = tanhfv(C->data.v[offset + r]);
-        }
-    }
+    tanh_activation_inplace(C);
 
-    assert(validate_scrappie_matrix
-           (C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
+    assert(validate_scrappie_matrix(C, -1.0, 1.0, 0.0, true, __FILE__, __LINE__));
     return C;
 }
 
@@ -372,6 +369,8 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
     assert(NULL != bias);
     assert(x->nr == xW->nr);
     const int size = istate->nr;
+    assert(size % 4 == 0);  // Vectorisation assumes size divisible by 4
+    const int sizeq = size / 4;
     assert(3 * size == xW->nc);
     assert(size == sW->nr);
     assert(2 * size == sW->nc);
@@ -391,25 +390,24 @@ void gru_step(const scrappie_matrix x, const scrappie_matrix istate,
      */
     cblas_sgemv(CblasColMajor, CblasTrans, sW->nr, sW->nc, 1.0, sW->data.f,
                 sW->nrq * 4, istate->data.f, 1, 1.0, xF->data.f, 1);
-    for (int i = 0; i < (size / 2); i++) {
-        xF->data.v[i] = logisticfv(xF->data.v[i]);
+    for (int i = 0; i < (sizeq +sizeq); i++) {
+        xF->data.v[i] = LOGISTICFV(xF->data.v[i]);
     }
 
-    const int sizeq = size / 4;
     const __m128 *z = xF->data.v;
     __m128 *r = xF->data.v + sizeq;
-    __m128 *hbar = xF->data.v + 2 * sizeq;
+    __m128 *hbar = xF->data.v + sizeq + sizeq;
     for (int i = 0; i < sizeq; i++) {
         r[i] *= istate->data.v[i];
     }
     cblas_sgemv(CblasColMajor, CblasTrans, sW2->nr, sW2->nc, 1.0, sW2->data.f,
                 sW2->nrq * 4, (float *)r, 1, 1.0, (float *)hbar, 1);
     for (int i = 0; i < sizeq; i++) {
-        hbar[i] = tanhfv(hbar[i]);
+        hbar[i] = TANHFV(hbar[i]);
     }
 
     const __m128 ones = _mm_set1_ps(1.0f);
-    for (int i = 0; i < sizeq; i++) {
+    for (int i = 0; i < sizeq ; i++) {
         ostate->data.v[i] = z[i] * istate->data.v[i] + (ones - z[i]) * hbar[i];
     }
 }
@@ -537,24 +535,24 @@ void lstm_step(const scrappie_matrix xAffine, const scrappie_matrix out_prev,
     cblas_sgemv(CblasColMajor, CblasTrans, sW->nr, sW->nc, 1.0, sW->data.f,
                 sW->nrq * 4, out_prev->data.f, 1, 1.0, xF->data.f, 1);
 
-    assert((size % 4) == 0);
+    assert(size % 4 == 0);  // Vectorisation assumes size divisible by 4
     const int sizeq = size / 4;
     for (int i = 0; i < sizeq; i++) {
         // Forget gate
-        __m128 forget = logisticfv(xF->data.v[2 * sizeq + i]
+        __m128 forget = LOGISTICFV(xF->data.v[2 * sizeq + i]
                                    + state->data.v[i] * peep->data.v[sizeq + i])
             * state->data.v[i];
         // Update gate
-        __m128 update = logisticfv(xF->data.v[sizeq + i]
+        __m128 update = LOGISTICFV(xF->data.v[sizeq + i]
                                    + state->data.v[i] * peep->data.v[i])
-            * tanhfv(xF->data.v[i]);
+            * TANHFV(xF->data.v[i]);
         state->data.v[i] = _mm_add_ps(forget, update);
         // Output gate
-        output->data.v[i] = logisticfv(xF->data.v[3 * sizeq + i]
+        output->data.v[i] = LOGISTICFV(xF->data.v[3 * sizeq + i]
                                        +
                                        state->data.v[i] * peep->data.v[2 *
                                                                        sizeq +
                                                                        i])
-            * tanhfv(state->data.v[i]);
+            * TANHFV(state->data.v[i]);
     }
 }
