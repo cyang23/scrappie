@@ -160,7 +160,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
         goto clean2;
     }
 
-    H5Tinsert(filetype, "start", 0, H5T_STD_U32LE);
+    H5Tinsert(filetype, "start", 0, H5T_IEEE_F64LE);
     H5Tinsert(filetype, "length", 4, H5T_IEEE_F32LE);
     H5Tinsert(filetype, "mean", 4 * 2, H5T_IEEE_F32LE);
     H5Tinsert(filetype, "stdv", 4 * 3, H5T_IEEE_F32LE);
