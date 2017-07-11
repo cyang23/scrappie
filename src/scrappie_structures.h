@@ -22,7 +22,7 @@ typedef struct {
 
 typedef struct {
     size_t n;
-    size_t start
+    size_t start;
     size_t end;
     float *raw;
 } raw_table;

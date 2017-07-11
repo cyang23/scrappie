@@ -5,6 +5,8 @@
 #include "decode.h"
 #include "util.h"
 
+#include "scrappie_assert.h"
+
 #define NBASE 4
 
 #ifndef __SSE2__
@@ -489,9 +491,9 @@ char *dwell_corrected_overlapper(const int *seq, const int *dwell, int n,
 
 char *homopolymer_dwell_correction(const event_table et, const int *seq,
                                    size_t nstate, size_t basecall_len) {
-    if (NULL == et.event || NULL == seq) {
-        return NULL;
-    }
+    RETURN_NULL_IF(NULL == et.event, NULL);
+    RETURN_NULL_IF(NULL == seq, NULL);
+
     const int nev = et.end - et.start;
     const int evoffset = et.start;
 
