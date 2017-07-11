@@ -3,9 +3,10 @@
 #    define SCRAPPIE_STRUCTURES_H
 
 #    include <stddef.h>
+#    include <inttypes.h>
 
 typedef struct {
-    double start;
+    uint64_t start;
     float length;
     float mean;
     float stdv;

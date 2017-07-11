@@ -7,10 +7,11 @@ extern "C" {
 
 #    include <immintrin.h>
 #    include <stdbool.h>
+#    include <inttypes.h>
 
 /*  Structure definitions from scrappie_structures.h  */
     typedef struct {
-        double start;
+        uint64_t start;
         float length;
         float mean;
         float stdv;

@@ -139,6 +139,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
                             const event_table et, hsize_t chunk_size,
                             int compression_level) {
     assert(compression_level >= 0 && compression_level <= 9);
+
     // Memory representation
     hid_t memtype = H5Tcreate(H5T_COMPOUND, sizeof(event_t));
     if (memtype < 0) {
@@ -146,7 +147,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
               __FILE__, __LINE__);
         goto clean1;
     }
-    H5Tinsert(memtype, "start", HOFFSET(event_t, start), H5T_NATIVE_DOUBLE);
+    H5Tinsert(memtype, "start", HOFFSET(event_t, start), H5T_NATIVE_UINT64);
     H5Tinsert(memtype, "length", HOFFSET(event_t, length), H5T_NATIVE_FLOAT);
     H5Tinsert(memtype, "mean", HOFFSET(event_t, mean), H5T_NATIVE_FLOAT);
     H5Tinsert(memtype, "stdv", HOFFSET(event_t, stdv), H5T_NATIVE_FLOAT);
@@ -160,7 +161,7 @@ void write_annotated_events(hid_t hdf5file, const char *readname,
         goto clean2;
     }
 
-    H5Tinsert(filetype, "start", 0, H5T_IEEE_F64LE);
+    H5Tinsert(filetype, "start", 0, H5T_STD_U64LE);
     H5Tinsert(filetype, "length", 4, H5T_IEEE_F32LE);
     H5Tinsert(filetype, "mean", 4 * 2, H5T_IEEE_F32LE);
     H5Tinsert(filetype, "stdv", 4 * 3, H5T_IEEE_F32LE);

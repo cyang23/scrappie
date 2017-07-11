@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <err.h>
 #include <float.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -222,7 +223,7 @@ event_t create_event(size_t start, size_t end, double const *sums,
     RETURN_NULL_IF(NULL == sums, event);
     RETURN_NULL_IF(NULL == sumsqs, event);
 
-    event.start = (double)start;
+    event.start = (uint64_t)start;
     event.length = (float)(end - start);
     event.mean = (float)(sums[end] - sums[start]) / event.length;
     const float deltasqr = (sumsqs[end] - sumsqs[start]);

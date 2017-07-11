@@ -496,20 +496,17 @@ char *homopolymer_dwell_correction(const event_table et, const int *seq,
 
     const int nev = et.end - et.start;
     const int evoffset = et.start;
+    assert(et.event[nev + evoffset - 1].start >= et.event[evoffset].start);
 
-    const float prior_scale =
-        (et.event[nev + evoffset - 1].length +
-         et.event[nev + evoffset - 1].start - et.event[evoffset].start)
-        / (float)basecall_len;
     int *dwell = calloc(nev, sizeof(int));
     for (int ev = 0; ev < nev; ev++) {
         dwell[ev] = et.event[ev + evoffset].length;
     }
 
-    /*   Calibrate scaling factor for homopolymer estimation.
-     *   Simple mean of the dwells of all 'step' movements in
+    /* Calibrate scaling factor for homopolymer estimation.
+     * Simple mean of the dwells of all 'step' movements in
      * the basecall.  Steps within homopolymers are ignored.
-     *   A more complex calibration could be used.
+     * A more complex calibration could be used.
      */
     int tot_step_dwell = 0;
     int nstep = 0;
@@ -532,7 +529,12 @@ char *homopolymer_dwell_correction(const event_table et, const int *seq,
         ppos = et.event[ev + evoffset].pos;
         pstate = et.event[ev + evoffset].state;
     }
+
     // Estimate of scale with a prior with weight equal to a single observation.
+    const float start_delta = (float)(et.event[nev + evoffset - 1].start
+                                    - et.event[evoffset          ].start);
+    const float prior_scale =
+        (et.event[nev + evoffset - 1].length + start_delta) / (float)basecall_len;
     const float homo_scale = (prior_scale + tot_step_dwell) / (1.0 + nstep);
     const dwell_model dm = { homo_scale, {0.0f, 0.0f, 0.0f, 0.0f} };
 
