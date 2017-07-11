@@ -217,9 +217,8 @@ static struct argp argp = {options, parse_arg, args_doc, doc};
 static struct _raw_basecall_info calculate_post(char * filename, bool use_rgr){
     RETURN_NULL_IF(NULL == filename, _raw_basecall_info_null);
 
-    raw_table rt = read_raw(filename, true);
-    RETURN_NULL_IF(NULL == rt.raw, _raw_basecall_info_null);
     raw_table rt = read_trim_and_segment_raw(filename, args.trim_start, args.trim_end, args.varseg_chunk, args.varseg_thresh);
+    RETURN_NULL_IF(NULL == rt.raw, _raw_basecall_info_null);
 
     medmad_normalise_array(rt.raw + rt.start, rt.end - rt.start);
 	scrappie_matrix post = use_rgr ? nanonet_rgr_posterior(rt, args.min_prob, true)
